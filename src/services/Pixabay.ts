@@ -9,12 +9,14 @@ export class PixabayApi {
  * for some help.
  * https://kentcdodds.com/blog/using-fetch-with-type-script
  */
-  async search(term: string): Promise<ImageList> {
+  async search(term: string, page: number = 1): Promise<ImageList> {
     const res = await fetch(this.apiUrl + new URLSearchParams({
       key: '27318557-791fcff14ff685ad536055f95',
       q: term,
       image_type: 'photo',
       safeSearch: 'true',
+      per_page: '21',
+      page: (page + 1).toString(),
     }));
 
     const data = await res.json();

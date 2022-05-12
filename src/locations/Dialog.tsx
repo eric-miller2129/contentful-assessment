@@ -5,7 +5,8 @@ import {
   TextInput,
   Box,
   Grid,
-  IconButton
+  IconButton,
+  Pagination
 } from '@contentful/f36-components';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -26,22 +27,27 @@ const Dialog = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedImg, setSelectedImg] = useState<ImageResource | null>(null);
 
+  // Pagination
+  const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   const debounceSearch = useDebounce(searchTerm, 1000);
 
   useEffect(() => {
     if (debounceSearch) {
-      Pixabay.search(debounceSearch)
+      Pixabay.search(debounceSearch, page)
         .then(
           data => {
             setLoading(false);
             setResults(data.hits);
+            setTotalPages(Math.round(data.totalHits / 21));
           }
         )
     } else {
       setLoading(false);
       setResults([]);
     }
-  }, [debounceSearch]);
+  }, [debounceSearch, page]);
 
   useEffect(() => {
     if (selectedImg) {
@@ -100,7 +106,6 @@ const Dialog = () => {
           <Grid.Item key={r.id}>
             <ItemResult
               image={r}
-              key={r.id}
               setSelectedImg={setSelectedImg}
               selectedImg={selectedImg}
             />
@@ -108,6 +113,18 @@ const Dialog = () => {
         )
       }
     </Grid>
+    {
+      (results.length > 0 && !loading) &&
+      <Box
+        padding="spacingM">
+        <Pagination
+          activePage={page}
+          onPageChange={setPage}
+          itemsPerPage={21}
+          isLastPage={(page + 1) >= totalPages}
+        />
+      </Box>
+    }
   </>
 };
 
